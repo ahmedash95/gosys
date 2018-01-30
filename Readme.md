@@ -1,0 +1,1 @@
+# GoSys a simple syslog for nginx logs
