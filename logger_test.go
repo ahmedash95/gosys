@@ -66,3 +66,19 @@ func Test_Create_Log_With_Diffrenet_Times(t *testing.T) {
 	hits = l.GetByTime(time2)[404]
 	assert.Equal(t, 2, int(hits))
 }
+
+func Test_Time_Format(t *testing.T) {
+	setDefaultTimeFormat("2006-01-02 15:04")
+	now := time.Now()
+	l := CreateLogger()
+	log := Log{
+		Time: now,
+		Code: 200,
+		Hits: 3,
+	}
+	l.Push(log)
+	l.setTimeFormat("2006-01-02 15:04:05")
+	hits := l.GetByTime(now)[200]
+	// it should give zero because GetByTime method will format by defaultTimeFormat
+	assert.Equal(t, 0, int(hits))
+}
