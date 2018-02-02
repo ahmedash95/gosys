@@ -1,8 +1,14 @@
 package main
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
-var defaultTimeFormat = "2006-01-02 15:04"
+var (
+	defaultTimeFormat = "2006-01-02 15:04"
+	RWm               = sync.RWMutex{}
+)
 
 type Logger struct {
 	Logs       map[string]map[int]int64
@@ -37,13 +43,19 @@ func CreateLogger() Logger {
 
 func (l *Logger) Push(log Log) {
 	k := log.Time.Format(l.TimeFormat)
+	RWm.Lock()
 	logTime, ok := l.Logs[k]
+	RWm.Unlock()
 	if !ok {
 		l.Logs[k] = make(map[int]int64)
+		RWm.Lock()
 		logTime = l.Logs[k]
 		logTime[log.Code] = 0
+		RWm.Unlock()
 	}
+	RWm.Lock()
 	logTime[log.Code] += log.Hits
+	RWm.Unlock()
 }
 
 func (l *Logger) GetByTime(t time.Time) map[int]int64 {
