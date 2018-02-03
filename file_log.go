@@ -51,6 +51,17 @@ func writeLog() {
 		logFile, err := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0664)
 		if err != nil {
 			fmt.Println(err)
+			// detect if file exists
+			var _, err = os.Stat(logPath)
+			// create file if not exists
+			if os.IsNotExist(err) {
+				var file, err = os.Create(logPath)
+				if err != nil {
+					fmt.Println(err)
+				}
+				defer file.Close()
+			}
+			mutex.Unlock()
 			continue
 		}
 		targetTime := time.Now().Add(-writeDelay)
