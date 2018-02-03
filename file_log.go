@@ -14,7 +14,7 @@ import (
 var mutex sync.Mutex
 var entries logEntries
 
-const logPath = "/Users/ash/go/src/github.com/ahmedash95/gosys/log.txt"
+var logPath = "/var/log/gosys.log"
 
 var tickCh = time.Tick(2 * time.Second)
 var writeDelay = 2 * time.Second
@@ -42,6 +42,10 @@ func LogToFile(e LogEntry) {
 	mutex.Lock()
 	entries = append(entries, e)
 	mutex.Unlock()
+}
+
+func SetLogPath(path string) {
+	logPath = path
 }
 
 func writeLog() {

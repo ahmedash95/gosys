@@ -39,6 +39,9 @@ func main() {
 
 	StartDispatcher(*NWorkers)
 
+	// Register log path
+	SetLogPath(getProjectPath() + "/gosys.log")
+
 	// init logger
 	Logs = CreateLogger()
 
@@ -84,7 +87,11 @@ func main() {
 }
 
 func loadOldLogs(w http.ResponseWriter, r *http.Request) {
-	body, _ := json.Marshal(OldLogs[len(OldLogs)-3000:])
+	var msgs = OldLogs
+	if len(OldLogs) > 3000 {
+		msgs = OldLogs[len(OldLogs)-3000:]
+	}
+	body, _ := json.Marshal(msgs)
 	w.Write(body)
 }
 
