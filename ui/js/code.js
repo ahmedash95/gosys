@@ -65,24 +65,43 @@ var pushLogUpdate = function(time,count){
     window.myLine.update()
 }
 
-// WebScoket Messages
-var sock = null;
-var wsuri = "ws://127.0.0.1:3000/ws";
+setTimeout(function(){
+    // load old logs
+    $.ajax({
+        url : "http://127.0.0.1:3000/logs",
+        success : function(response){
+            var messages = JSON.parse(response)
+            for(var i = 0; i < messages.length; i++){
+                pushLogUpdate(messages[i].time,messages[i].hits)
+            }
+            startWS()
+        },
+        error : function(){
+            startWS()
+        }
+    })
+},300)
 
-sock = new WebSocket(wsuri);
+var startWS = function(){
+    // WebScoket Messages
+    var sock = null;
+    var wsuri = "ws://127.0.0.1:3000/ws";
 
-sock.onopen = function() {
-    console.log("connected to " + wsuri);
-}
+    sock = new WebSocket(wsuri);
 
-sock.onclose = function(e) {
-    console.log("connection closed (" + e.code + ")");
-}
+    sock.onopen = function() {
+        console.log("connected to " + wsuri);
+    }
 
-sock.onmessage = function(e) {
-    console.log("message received: " + e.data);
-    var msg = JSON.parse(e.data);
-    setTimeout(function(){
-        pushLogUpdate(msg.time,msg.hits)
-    },300)
+    sock.onclose = function(e) {
+        console.log("connection closed (" + e.code + ")");
+    }
+
+    sock.onmessage = function(e) {
+        console.log("message received: " + e.data);
+        var msg = JSON.parse(e.data);
+        setTimeout(function(){
+            pushLogUpdate(msg.time,msg.hits)
+        },300)
+    }
 }
