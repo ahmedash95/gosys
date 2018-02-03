@@ -42,18 +42,14 @@ func CreateLogger() Logger {
 }
 
 func (l *Logger) Push(log Log) {
-	k := log.Time.Format(l.TimeFormat)
 	RWm.Lock()
+	k := log.Time.Format(l.TimeFormat)
 	logTime, ok := l.Logs[k]
-	RWm.Unlock()
 	if !ok {
 		l.Logs[k] = make(map[int]int64)
-		RWm.Lock()
 		logTime = l.Logs[k]
 		logTime[log.Code] = 0
-		RWm.Unlock()
 	}
-	RWm.Lock()
 	logTime[log.Code] += log.Hits
 	RWm.Unlock()
 }
