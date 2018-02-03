@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 
 	syslog "gopkg.in/mcuadros/go-syslog.v2"
 )
@@ -45,6 +46,19 @@ func main() {
 
 	fmt.Printf("Server is up and running on %s\npress <Enter> key to exit\n", *HTTPAddr)
 
+	// start websocket listner
+	go handleMessages()
+
+	go func() {
+
+		// Configure websocket route
+		http.HandleFunc("/ws", handleConnections)
+		// web ui dashboard
+		fs := http.FileServer(http.Dir("ui"))
+		http.Handle("/", fs)
+		http.ListenAndServe(":3000", nil)
+	}()
+
 	fmt.Scanln()
 }
 
@@ -56,7 +70,9 @@ func pushLog(line string) {
 		Hits: 1,
 	}
 	Logs.Push(log)
-	clearCli()
+	// Send the newly received message to the broadcast channel
+	broadcast <- log
+	// clearCli()
 	// fmt.Println("Push new log")
-	fmt.Println(Logs)
+	// fmt.Println(Logs)
 }
